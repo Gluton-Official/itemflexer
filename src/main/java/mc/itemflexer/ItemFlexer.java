@@ -1,6 +1,5 @@
 package mc.itemflexer;
 
-import com.google.common.collect.Lists;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import mc.microconfig.MicroConfig;
 import net.fabricmc.api.ModInitializer;
@@ -15,7 +14,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ItemFlexer implements ModInitializer {
@@ -28,18 +26,8 @@ public class ItemFlexer implements ModInitializer {
         System.out.println("Flex your items!");
         
         ServerTickEvents.END_SERVER_TICK.register((world) -> {
-            for (ServerPlayerEntity player : cooldowns.keySet()) {
-                int current = cooldowns.get(player);
-                cooldowns.put(player, current - 1);
-            }
-            
-            ArrayList<ServerPlayerEntity> toRemove = Lists.newArrayList();
-            for (ServerPlayerEntity player : cooldowns.keySet()) {
-                if (cooldowns.get(player) <= 0) {
-                	toRemove.add(player);
-                }
-            }
-            toRemove.forEach(player -> cooldowns.remove(player));
+            cooldowns.replaceAll((player, cooldown) -> cooldown - 1);
+            cooldowns.entrySet().removeIf(entry -> entry.getValue() <= 0);
         });
         
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> dispatcher.register(
